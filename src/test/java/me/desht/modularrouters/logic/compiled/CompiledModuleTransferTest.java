@@ -2,7 +2,6 @@ package me.desht.modularrouters.logic.compiled;
 
 import me.desht.modularrouters.block.tile.TileEntityItemRouter;
 import me.desht.modularrouters.item.augment.ItemAugment;
-import me.desht.modularrouters.item.module.ItemModule;
 import me.desht.modularrouters.logic.filter.Filter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -66,10 +65,13 @@ public class CompiledModuleTransferTest {
     }
 
     private static TestCompiledModule createCompiledModule() throws Exception {
-        ItemStack moduleStack = new ItemStack(new ItemModule(), 1, ItemModule.ModuleType.PULLER.ordinal());
         TestCompiledModule module = (TestCompiledModule) getUnsafe().allocateInstance(TestCompiledModule.class);
+        ItemAugment.AugmentCounter augmentCounter =
+                (ItemAugment.AugmentCounter) getUnsafe().allocateInstance(ItemAugment.AugmentCounter.class);
+        setField(augmentCounter, ItemAugment.AugmentCounter.class, "counts",
+                new int[ItemAugment.AugmentType.values().length]);
         setField(module, "filter", new Filter());
-        setField(module, "augmentCounter", new ItemAugment.AugmentCounter(moduleStack));
+        setField(module, "augmentCounter", augmentCounter);
         return module;
     }
 
@@ -80,7 +82,11 @@ public class CompiledModuleTransferTest {
     }
 
     private static void setField(Object target, String name, Object value) throws Exception {
-        Field field = CompiledModule.class.getDeclaredField(name);
+        setField(target, CompiledModule.class, name, value);
+    }
+
+    private static void setField(Object target, Class<?> owner, String name, Object value) throws Exception {
+        Field field = owner.getDeclaredField(name);
         field.setAccessible(true);
         field.set(target, value);
     }
