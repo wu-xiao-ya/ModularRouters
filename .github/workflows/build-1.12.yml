@@ -32,8 +32,8 @@ jobs:
         run: |
           chmod +x gradlew
           for attempt in 1 2 3; do
-            if ./gradlew clean test build --no-daemon --stacktrace; then
-              exit 0
+            if ./gradlew sourceMainJava --no-daemon --stacktrace; then
+              break
             fi
             if [ "$attempt" -eq 3 ]; then
               exit 1
@@ -41,6 +41,7 @@ jobs:
             echo "Gradle attempt $attempt failed; retrying with the populated dependency cache..."
             sleep 10
           done
+          ./gradlew clean test build --no-daemon --stacktrace
         env:
           BUILD_NUMBER: gh${{ github.run_number }}
 

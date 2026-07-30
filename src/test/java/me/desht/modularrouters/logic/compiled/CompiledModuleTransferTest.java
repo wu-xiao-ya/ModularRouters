@@ -3,10 +3,12 @@ package me.desht.modularrouters.logic.compiled;
 import me.desht.modularrouters.block.tile.TileEntityItemRouter;
 import me.desht.modularrouters.item.augment.ItemAugment;
 import me.desht.modularrouters.logic.filter.Filter;
+import net.minecraft.init.Bootstrap;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import sun.misc.Unsafe;
 
@@ -18,6 +20,11 @@ import static org.junit.Assert.assertTrue;
 
 public class CompiledModuleTransferTest {
     private static final Item TEST_ITEM = new Item();
+
+    @BeforeClass
+    public static void bootstrapMinecraft() {
+        Bootstrap.register();
+    }
 
     @Test
     public void transferUsesStableSlotCountWhenHandlerBecomesEmpty() throws Exception {
