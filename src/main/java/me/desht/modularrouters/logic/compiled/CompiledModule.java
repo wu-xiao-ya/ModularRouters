@@ -147,9 +147,7 @@ public abstract class CompiledModule {
      * @return the last position including offset, and wrapped to start of inventory if necessary
      */
     private int getLastMatchPos(int offset, int size) {
-        int pos = lastMatchPos + offset;
-        if (pos >= size) pos -= size;
-        return pos;
+        return Math.floorMod(lastMatchPos + offset, size);
     }
 
     /**
@@ -194,21 +192,28 @@ public abstract class CompiledModule {
      * @return number of items actually transferred
      */
     int transferToRouter(IItemHandler handler, TileEntityItemRouter router) {
-        CountedItemStacks count = getAugmentCount(ItemAugment.AugmentType.REGULATOR) > 0 ? new CountedItemStacks(handler) : null;
+        // Some handlers hide their only slot as soon as extraction empties it.
+        int slotCount = handler.getSlots();
+        if (slotCount <= 0) {
+            return 0;
+        }
 
-        ItemStack wanted = findItemToPull(router, handler, getItemsPerTick(router), count);
+        CountedItemStacks count = getAugmentCount(ItemAugment.AugmentType.REGULATOR) > 0 ?
+                new CountedItemStacks(handler, slotCount) : null;
+
+        ItemStack wanted = findItemToPull(router, handler, slotCount, getItemsPerTick(router), count);
         if (wanted.isEmpty()) {
             return 0;
         }
 
         int totalInserted = 0;
-        for (int i = 0; i < handler.getSlots(); i++) {
-            int pos = getLastMatchPos(i, handler.getSlots());
+        for (int i = 0; i < slotCount; i++) {
+            int pos = getLastMatchPos(i, slotCount);
             ItemStack toPull = handler.extractItem(pos, wanted.getCount(), true);
             if (toPull.isEmpty()) {
                 // we'd found an item to pull but it looks like this handler doesn't allow us to extract it
                 // give up, but advance the last match pos so we don't get stuck trying this slot forever
-                setLastMatchPos((pos + 1) % handler.getSlots());
+                setLastMatchPos((pos + 1) % slotCount);
                 return 0;
             }
             if (ItemHandlerHelper.canItemStacksStack(wanted, toPull)) {
@@ -219,7 +224,7 @@ public abstract class CompiledModule {
                 wanted.shrink(inserted);
                 totalInserted += inserted;
                 if (wanted.isEmpty() || router.isBufferFull()) {
-                    setLastMatchPos(handler.getStackInSlot(pos).isEmpty() ? (pos + 1) % handler.getSlots() : pos);
+                    setLastMatchPos(handler.getStackInSlot(pos).isEmpty() ? (pos + 1) % slotCount : pos);
                     return totalInserted;
                 }
             }
@@ -227,15 +232,16 @@ public abstract class CompiledModule {
         return totalInserted;
     }
 
-    private ItemStack findItemToPull(TileEntityItemRouter router, IItemHandler handler, int nToTake, CountedItemStacks count) {
+    private ItemStack findItemToPull(TileEntityItemRouter router, IItemHandler handler, int slotCount,
+                                     int nToTake, CountedItemStacks count) {
         ItemStack stackInRouter = router.peekBuffer(1);
         if (!stackInRouter.isEmpty() && getFilter().test(stackInRouter)) {
             // something in the router - try to pull more of that
             return ItemHandlerHelper.copyStackWithSize(stackInRouter, nToTake);
         } else if (stackInRouter.isEmpty()) {
             // router empty - just pull the next item that passes the filter
-            for (int i = 0; i < handler.getSlots(); i++) {
-                int pos = getLastMatchPos(i, handler.getSlots());
+            for (int i = 0; i < slotCount; i++) {
+                int pos = getLastMatchPos(i, slotCount);
                 ItemStack stack = handler.getStackInSlot(pos);
                 // if regulation is in force, there must be at least enough items to fulfill nToTake, or nothing will
                 // be pulled - https://github.com/desht/ModularRouters/issues/53

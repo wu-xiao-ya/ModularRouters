@@ -2,9 +2,10 @@
 buildscript {
     repositories {
         jcenter()
+        mavenCentral()
         maven {
             name = "forge"
-            url = "http://files.minecraftforge.net/maven"
+            url = "https://maven.minecraftforge.net"
         }
     }
     dependencies {
@@ -40,12 +41,13 @@ minecraft {
 
 repositories {
     jcenter { }
+    mavenCentral()
     flatDir {
         dir 'libs/'
     }
     maven { // TOP
         name = "tterrag maven"
-        url = "http://maven.tterrag.com/"
+        url = "https://maven.tterrag.com/"
     }
 //    maven {
 //        name = "guideapi/hwyla"
@@ -53,15 +55,15 @@ repositories {
 //    }
     maven {
         name = "tesla"
-        url = "http://maven.mcmoddev.com"
+        url = "https://maven.mcmoddev.com"
     }
     maven {
         name = "JEI"
-        url = "http://dvs1.progwml6.com/files/maven"
+        url = "https://dvs1.progwml6.com/files/maven"
     }
     maven {
         name = "CoFH Maven"
-        url = "http://maven.covers1624.net"
+        url = "https://maven.covers1624.net"
     }
     maven {
         name = "K-4u Mod maven"
@@ -78,6 +80,7 @@ dependencies {
     provided "com.google.errorprone:error_prone_annotations:2.1.0"
     compile "net.darkhax.tesla:Tesla-1.12:${config.tesla_version}"
     compile "team.chisel.ctm:CTM:MC1.12.2-0.3.2.18:api"
+    testCompile "junit:junit:4.13.2"
 }
 
 processResources {

@@ -27,9 +27,13 @@ public class CountedItemStacks extends TCustomHashMap<ItemStack, Integer> {
     }
 
     public CountedItemStacks(IItemHandler handler) {
-        super(new ItemStackHashingStrategy(), handler.getSlots());
+        this(handler, handler.getSlots());
+    }
 
-        for (int i = 0; i < handler.getSlots(); i++) {
+    public CountedItemStacks(IItemHandler handler, int slotCount) {
+        super(new ItemStackHashingStrategy(), Math.max(slotCount, 0));
+
+        for (int i = 0; i < slotCount; i++) {
             ItemStack stack = handler.getStackInSlot(i);
             if (!stack.isEmpty()) {
                 put(stack, getOrDefault(stack, 0) + stack.getCount());

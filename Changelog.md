@@ -6,6 +6,11 @@ Changes are in reverse chronological order; newest changes at the top.
 
 ## Minecraft 1.12.2
 
+### 3.3.1 (30 Jul 2026)
+
+* Fixed a server crash when a Puller Module extracts from an item handler whose reported slot count drops to zero after extraction.
+* Inventory search positions are now normalized when a target inventory changes size.
+
 ### 3.3.0 (12 May 2020)
 
 This will be the final build of Modular Routers released for 1.12.2 (barring any critical bugs).  It contains one new feature, backported from the 1.15.2 version of the mod:
